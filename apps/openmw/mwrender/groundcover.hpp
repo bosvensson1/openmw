@@ -33,7 +33,7 @@ namespace MWRender
     class Groundcover : public Resource::GenericResourceManager<ChunkId>, public Terrain::QuadTreeWorld::ChunkManager
     {
     public:
-        Groundcover(Resource::SceneManager* sceneManager, float density);
+        Groundcover(Resource::SceneManager* sceneManager, float density, float viewDistance);
         ~Groundcover() = default;
 
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile) override;
@@ -56,6 +56,7 @@ namespace MWRender
     private:
         Resource::SceneManager* mSceneManager;
         float mDensity;
+        float mViewDistance;
 
         typedef std::map<std::string, std::vector<GroundcoverEntry>> InstanceMap;
         osg::ref_ptr<osg::Node> createChunk(InstanceMap& instances, const osg::Vec2f& center);
