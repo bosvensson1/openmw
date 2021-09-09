@@ -70,10 +70,15 @@ namespace MWRender
         {
             for (unsigned int i = 0; i < geom.getNumPrimitiveSets(); ++i)
             {
-                geom.getPrimitiveSet(i)->setNumInstances(mInstances.size());
+                osg::ref_ptr<PrimitiveSet> ps = static_cast<osg::PrimitiveSet*>(geom.getPrimitiveSet(i)->clone(osg::CopyOp::SHALLOW_COPY));
+                ps->setNumInstances(mInstances.size());
+                ps->setElementBufferObject(new osg::ElementBufferObject);
+                geom.setPrimitiveSet(i, ps);
             }
 
+            osg::ref_ptr<osg::VertexBufferObject> vbo = new osg::VertexBufferObject;
             osg::ref_ptr<osg::Vec4Array> transforms = new osg::Vec4Array(mInstances.size());
+            transforms->setVertexBufferObject(vbo);
             osg::BoundingBox box;
             float radius = geom.getBoundingBox().radius();
             for (unsigned int i = 0; i < transforms->getNumElements(); i++)
@@ -95,14 +100,14 @@ namespace MWRender
             {
                 (*rotations)[i] = mInstances[i].mPos.asRotationVec3();
             }
+            rotations->setVertexBufferObject(vbo);
 
             // Display lists do not support instancing in OSG 3.4
             geom.setUseDisplayList(false);
+            geom.setUseVertexBufferObjects(true);
 
             geom.setVertexAttribArray(6, transforms.get(), osg::Array::BIND_PER_VERTEX);
             geom.setVertexAttribArray(7, rotations.get(), osg::Array::BIND_PER_VERTEX);
-
-            traverse(geom);
         }
     private:
         std::vector<Groundcover::GroundcoverEntry> mInstances;
@@ -235,7 +240,7 @@ namespace MWRender
         for (auto& pair : instances)
         {
             const osg::Node* temp = mSceneManager->getTemplate(pair.first);
-            osg::ref_ptr<osg::Node> node = static_cast<osg::Node*>(temp->clone(osg::CopyOp::DEEP_COPY_ALL&(~osg::CopyOp::DEEP_COPY_TEXTURES)));
+            osg::ref_ptr<osg::Node> node = static_cast<osg::Node*>(temp->clone(osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES|osg::CopyOp::DEEP_COPY_USERDATA)));
 
             // Keep link to original mesh to keep it in cache
             group->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(temp));
