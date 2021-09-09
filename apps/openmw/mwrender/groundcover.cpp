@@ -66,18 +66,6 @@ namespace MWRender
         {
         }
 
-        void apply(osg::Node& node) override
-        {
-            osg::ref_ptr<osg::StateSet> ss = node.getStateSet();
-            if (ss != nullptr)
-            {
-                ss->removeAttribute(osg::StateAttribute::MATERIAL);
-                removeAlpha(ss);
-            }
-
-            traverse(node);
-        }
-
         void apply(osg::Geometry& geom) override
         {
             for (unsigned int i = 0; i < geom.getNumPrimitiveSets(); ++i)
@@ -114,28 +102,11 @@ namespace MWRender
             geom.setVertexAttribArray(6, transforms.get(), osg::Array::BIND_PER_VERTEX);
             geom.setVertexAttribArray(7, rotations.get(), osg::Array::BIND_PER_VERTEX);
 
-            osg::ref_ptr<osg::StateSet> ss = geom.getOrCreateStateSet();
-            ss->setAttribute(new osg::VertexAttribDivisor(6, 1));
-            ss->setAttribute(new osg::VertexAttribDivisor(7, 1));
-
-            ss->removeAttribute(osg::StateAttribute::MATERIAL);
-            removeAlpha(ss);
-
             traverse(geom);
         }
     private:
         std::vector<Groundcover::GroundcoverEntry> mInstances;
         osg::Vec3f mChunkPosition;
-
-        void removeAlpha(osg::StateSet* stateset)
-        {
-            // MGE uses default alpha settings for groundcover, so we can not rely on alpha properties
-            stateset->removeAttribute(osg::StateAttribute::ALPHAFUNC);
-            stateset->removeMode(GL_ALPHA_TEST);
-            stateset->removeAttribute(osg::StateAttribute::BLENDFUNC);
-            stateset->removeMode(GL_BLEND);
-            stateset->setRenderBinToInherit();
-        }
     };
 
     class DensityCalculator
@@ -199,7 +170,16 @@ namespace MWRender
          : GenericResourceManager<ChunkId>(nullptr)
          , mSceneManager(sceneManager)
          , mDensity(density)
+         , mStateset(new osg::StateSet)
     {
+         // MGE uses default alpha settings for groundcover, so we can not rely on alpha properties
+         // Force a unified alpha handling instead of data from meshes
+         osg::ref_ptr<osg::AlphaFunc> alpha = new osg::AlphaFunc(osg::AlphaFunc::GEQUAL, 128.f / 255.f);
+         mStateset->setAttributeAndModes(alpha.get(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+         mStateset->setAttributeAndModes(new osg::BlendFunc, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+         mStateset->setRenderBinDetails(0, "RenderBin", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+         mStateset->setAttribute(new osg::VertexAttribDivisor(6, 1));
+         mStateset->setAttribute(new osg::VertexAttribDivisor(7, 1));
     }
 
     void Groundcover::collectInstances(InstanceMap& instances, float size, const osg::Vec2f& center)
@@ -260,22 +240,18 @@ namespace MWRender
             // Keep link to original mesh to keep it in cache
             group->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(temp));
 
-            mSceneManager->reinstateRemovedState(node);
-
             InstancingVisitor visitor(pair.second, worldCenter);
             node->accept(visitor);
             group->addChild(node);
         }
 
-        // Force a unified alpha handling instead of data from meshes
-        osg::ref_ptr<osg::AlphaFunc> alpha = new osg::AlphaFunc(osg::AlphaFunc::GEQUAL, 128.f / 255.f);
-        group->getOrCreateStateSet()->setAttributeAndModes(alpha.get(), osg::StateAttribute::ON);
-        group->getBound();
+        group->setStateSet(mStateset);
         group->setNodeMask(Mask_Groundcover);
         if (mSceneManager->getLightingMethod() != SceneUtil::LightingMethod::FFP)
             group->setCullCallback(new SceneUtil::LightListCallback);
         mSceneManager->recreateShaders(group, "groundcover", false, true);
-
+        mSceneManager->shareState(group);
+        group->getBound();
         return group;
     }
 
