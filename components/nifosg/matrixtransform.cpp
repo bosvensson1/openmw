@@ -19,5 +19,10 @@ namespace NifOsg
         , mScale(copy.mScale)
         , mRotationScale(copy.mRotationScale)
     {
+        if(copy._boundingSphereComputed)
+        {
+            _boundingSphereComputed=true;
+            _boundingSphere=copy._boundingSphere;
+        }
     }
 }
