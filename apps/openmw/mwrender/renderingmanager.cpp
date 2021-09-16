@@ -265,11 +265,6 @@ namespace MWRender
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
     {
-        // The transparent renderbin sets alpha testing on because that was faster on old GPUs. It's now slower and breaks things.
-        // Hopefully, anything genuinely requiring the default alpha func of GL_ALWAYS explicitly sets it
-        osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setStateSet(nullptr);
-        osgUtil::RenderBin::getRenderBinPrototype("SORT_BACK_TO_FRONT")->setStateSet(nullptr);
-
         bool reverseZ = SceneUtil::getReverseZ();
 
         if (reverseZ)
@@ -506,6 +501,13 @@ namespace MWRender
         mStateUpdater->setFogEnd(mViewDistance);
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("simpleWater", false));
+
+        // The transparent renderbin sets alpha testing on because that was faster on old GPUs. It's now slower and breaks things.
+        // Hopefully, anything genuinely requiring the default alpha func of GL_ALWAYS explicitly sets it
+        osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setStateSet(nullptr);
+        osgUtil::RenderBin::getRenderBinPrototype("SORT_BACK_TO_FRONT")->setStateSet(nullptr);
+        // Prevents redundant glAlphaFunc calls
+        mRootNode->getOrCreateStateSet()->setAttribute(Shader::RemovedAlphaFunc::getInstance(GL_ALWAYS));
 
         if (reverseZ)
         {
