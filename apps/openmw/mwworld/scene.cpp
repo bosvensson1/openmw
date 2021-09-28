@@ -395,7 +395,6 @@ namespace MWWorld
                 defaultHeight.resize(verts*verts, ESM::Land::DEFAULT_HEIGHT);
                 mPhysics->addHeightField (&defaultHeight[0], cellX, cellY, worldsize / (verts-1), verts, ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
             }
-
             if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
             {
                 const osg::Vec2i cellPosition(cellX, cellY);
