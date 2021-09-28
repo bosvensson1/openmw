@@ -896,7 +896,7 @@ namespace MWWorld
     {
         try
         {
-            addObject(ptr, *mPhysics, mRendering, mPagedRefs, false);
+            addObject(ptr, *mPhysics, mRendering, mPagedRefs);
             addObject(ptr, *mPhysics, mNavigator);
             MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
             const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
