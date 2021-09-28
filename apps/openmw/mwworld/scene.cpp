@@ -104,7 +104,7 @@ namespace
     }
 
     void addObject(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
-                   MWRender::RenderingManager& rendering, std::set<ESM::RefNum>& pagedRefs, bool onlyPhysics)
+                   MWRender::RenderingManager& rendering, std::set<ESM::RefNum>& pagedRefs)
     {
         if (ptr.getRefData().getBaseNode() || physics.getActor(ptr))
         {
@@ -114,12 +114,6 @@ namespace
 
         std::string model = getModel(ptr, rendering.getResourceSystem()->getVFS());
         const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);
-        if (onlyPhysics && !physics.getObject(ptr) && !ptr.getClass().isActor())
-        {
-            // When we preload physics object we need to skip animated objects. They are dependant on the scene graph which doesn't yet exist.
-            ptr.getClass().insertObject (ptr, model, rotation, physics, true);
-            return;
-        }
 
         const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile() || pagedRefs.find(refnum) == pagedRefs.end())
@@ -137,8 +131,7 @@ namespace
         // Restore effect particles
         MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
 
-        if (!physics.getObject(ptr))
-            ptr.getClass().insertObject (ptr, model, rotation, physics);
+        ptr.getClass().insertObject (ptr, model, rotation, physics);
 
         MWBase::Environment::get().getLuaManager()->objectAddedToScene(ptr);
     }
@@ -624,7 +617,7 @@ namespace MWWorld
             if (!isCellInCollection(x, y, mActiveCells))
             {
                 CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
-                activateCell (cell, loadingListener, changeEvent);
+                loadCell (cell, loadingListener, changeEvent);
             }
         }
 
