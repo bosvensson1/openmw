@@ -248,16 +248,6 @@ namespace
         }
     }
 
-    struct PositionVisitor
-    {
-        bool operator() (const MWWorld::Ptr& ptr)
-        {
-            if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
-                ptr.getClass().adjustPosition (ptr, false);
-            return true;
-        }
-    };
-
     int getCellPositionDistanceToOrigin(const std::pair<int, int>& cellPosition)
     {
         return std::abs(cellPosition.first) + std::abs(cellPosition.second);
@@ -909,10 +899,6 @@ namespace MWWorld
         cell.forEach (insertVisitor);
         insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mRendering, mPagedRefs, onlyObjects); });
         insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mNavigator); });
-
-        // do adjustPosition (snapping actors to ground) after objects are loaded, so we don't depend on the loading order
-        PositionVisitor posVisitor;
-        cell.forEach (posVisitor);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)
