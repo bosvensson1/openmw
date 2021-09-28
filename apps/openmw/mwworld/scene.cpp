@@ -201,11 +201,10 @@ namespace
     {
         MWWorld::CellStore& mCell;
         Loading::Listener* mLoadingListener;
-        bool mOnlyObjects;
 
         std::vector<MWWorld::Ptr> mToInsert;
 
-        InsertVisitor (MWWorld::CellStore& cell, Loading::Listener* loadingListener, bool onlyObjects);
+        InsertVisitor (MWWorld::CellStore& cell, Loading::Listener* loadingListener);
 
         bool operator() (const MWWorld::Ptr& ptr);
 
@@ -213,8 +212,8 @@ namespace
         void insert(AddObject&& addObject);
     };
 
-    InsertVisitor::InsertVisitor (MWWorld::CellStore& cell, Loading::Listener* loadingListener, bool onlyObjects)
-        : mCell(cell), mLoadingListener(loadingListener), mOnlyObjects(onlyObjects)
+    InsertVisitor::InsertVisitor (MWWorld::CellStore& cell, Loading::Listener* loadingListener)
+        : mCell(cell), mLoadingListener(loadingListener)
     {}
 
     bool InsertVisitor::operator() (const MWWorld::Ptr& ptr)
@@ -230,7 +229,7 @@ namespace
     {
         for (MWWorld::Ptr& ptr : mToInsert)
         {
-            if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled() && (!mOnlyObjects || !ptr.getClass().isActor()))
+            if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
             {
                 try
                 {
@@ -391,6 +390,8 @@ namespace MWWorld
         {
             osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
             const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
+            const float verts = ESM::Land::LAND_SIZE;
+            const float worldsize = ESM::Land::REAL_SIZE;
             if (data)
             {
                 mPhysics->addHeightField (data->mHeights, cellX, cellY, worldsize / (verts-1), verts, data->mMinHeight, data->mMaxHeight, land.get());
@@ -535,20 +536,18 @@ namespace MWWorld
 
     void Scene::changeCellGrid (const osg::Vec3f &pos, int playerCellX, int playerCellY, bool changeEvent)
     {
-        CellStoreCollection::iterator active = mActiveCells.begin();
-        while (active!=mActiveCells.end())
+        for (auto iter = mActiveCells.begin(); iter != mActiveCells.end(); )
         {
-            if ((*active)->getCell()->isExterior())
+            auto* cell = *iter++;
+            if (cell->getCell()->isExterior())
             {
-                if (std::abs (playerCellX-(*active)->getCell()->getGridX())<=mHalfGridSize &&
-                    std::abs (playerCellY-(*active)->getCell()->getGridY())<=mHalfGridSize)
-                {
-                    // keep cells within the new grid
-                    ++active;
-                    continue;
-                }
+                const auto dx = std::abs(playerCellX - cell->getCell()->getGridX());
+                const auto dy = std::abs(playerCellY - cell->getCell()->getGridY());
+                if (dx > mHalfGridSize || dy > mHalfGridSize)
+                    unloadCell(cell);
             }
-            unloadCell (active++);
+            else
+                unloadCell (cell);
         }
 
         mCurrentGridCenter = osg::Vec2i(playerCellX, playerCellY);
@@ -895,9 +894,9 @@ namespace MWWorld
 
     void Scene::insertCell (CellStore &cell, Loading::Listener* loadingListener)
     {
-        InsertVisitor insertVisitor(cell, loadingListener, onlyObjects);
+        InsertVisitor insertVisitor(cell, loadingListener);
         cell.forEach (insertVisitor);
-        insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mRendering, mPagedRefs, onlyObjects); });
+        insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mRendering, mPagedRefs); });
         insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mNavigator); });
     }
 
