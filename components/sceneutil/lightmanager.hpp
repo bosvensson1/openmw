@@ -54,6 +54,8 @@ namespace SceneUtil
 
         float mActorFade;
 
+        osg::Vec4f mPositionOffset;
+
     public:
 
         META_Node(SceneUtil, LightSource)
@@ -83,6 +85,11 @@ namespace SceneUtil
             return mActorFade;
         }
 
+        const osg::Vec4f& getPositionOffset() const
+        {
+            return mPositionOffset;
+        }
+
         /// Get the osg::Light safe for modification in the given frame.
         /// @par May be used externally to animate the light's color/attenuation properties,
         /// and is used internally to synchronize the light's position with the position of the LightSource.
@@ -99,6 +106,7 @@ namespace SceneUtil
         {
             mLight[0] = light;
             mLight[1] = new osg::Light(*light);
+            mPositionOffset = light->getPosition();
         }
 
         /// Get the unique ID for this light source.
