@@ -50,22 +50,17 @@ public:
     EffectAnimationTime() : mTime(0) {  }
 };
 
-/// @brief Detaches the node from its parent when the object goes out of scope.
+/// @brief Detaches the nodes from its parent when the object goes out of scope.
 class PartHolder
 {
 public:
-    PartHolder(osg::ref_ptr<osg::Node> node);
-
+    PartHolder();
     ~PartHolder();
 
-    osg::ref_ptr<osg::Node> getNode()
-    {
-        return mNode;
-    }
+    osg::ref_ptr<osg::Group> mParent;
+    std::vector<osg::Node*> mNodes;
 
 private:
-    osg::ref_ptr<osg::Node> mNode;
-
     void operator= (const PartHolder&);
     PartHolder(const PartHolder&);
 };
