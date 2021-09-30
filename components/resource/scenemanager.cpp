@@ -28,6 +28,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/optimizer.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include <components/shader/shadervisitor.hpp>
 #include <components/shader/shadermanager.hpp>
@@ -243,19 +244,22 @@ namespace Resource
 
         void apply(osg::Node& node) override
         {
-            if (node.getOrCreateStateSet()->getRenderingHint() == osg::StateSet::TRANSPARENT_BIN)
+            if (osg::StateSet* stateset = node.getStateSet())
             {
-                osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
-                depth->setWriteMask(false);
+                if (stateset->getRenderingHint() == osg::StateSet::TRANSPARENT_BIN)
+                {
+                    osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+                    depth->setWriteMask(false);
 
-                node.getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
-            }
-            else if (node.getOrCreateStateSet()->getRenderingHint() == osg::StateSet::OPAQUE_BIN)
-            {
-                osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
-                depth->setWriteMask(true);
+                    stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                }
+                else if (stateset->getRenderingHint() == osg::StateSet::OPAQUE_BIN)
+                {
+                    osg::ref_ptr<osg::Depth> depth = SceneUtil::createDepth();
+                    depth->setWriteMask(true);
 
-                node.getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                    stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                }
             }
 
             /* Check if the <node> has <extra type="Node"> <technique profile="OpenSceneGraph"> <Descriptions> <Description>
@@ -268,22 +272,25 @@ namespace Resource
             }
 
             // Iterate each description, and see if the current node uses the specified material for alpha testing
-            for (auto description : mDescriptions)
+            if (node.getStateSet())
             {
-                std::vector<std::string> descriptionParts;
-                std::istringstream descriptionStringStream(description);
-                for (std::string part; std::getline(descriptionStringStream, part, ' ');)
+                for (auto description : mDescriptions)
                 {
-                    descriptionParts.emplace_back(part);
-                }
-
-                if (descriptionParts.size() > (3) && descriptionParts.at(3) == node.getOrCreateStateSet()->getName())
-                {
-                    if (descriptionParts.at(0) == "alphatest")
+                    std::vector<std::string> descriptionParts;
+                    std::istringstream descriptionStringStream(description);
+                    for (std::string part; std::getline(descriptionStringStream, part, ' ');)
                     {
-                        osg::AlphaFunc::ComparisonFunction mode = getTestMode(descriptionParts.at(1));
-                        osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(mode, std::stod(descriptionParts.at(2))));
-                        node.getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                        descriptionParts.emplace_back(part);
+                    }
+
+                    if (descriptionParts.size() > (3) && descriptionParts.at(3) == node.getStateSet()->getName())
+                    {
+                        if (descriptionParts.at(0) == "alphatest")
+                        {
+                            osg::AlphaFunc::ComparisonFunction mode = getTestMode(descriptionParts.at(1));
+                            osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc(mode, std::stod(descriptionParts.at(2))));
+                            node.getStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+                        }
                     }
                 }
             }
@@ -326,10 +333,11 @@ namespace Resource
         return mForceShaders;
     }
 
-    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool translucentFramebuffer, bool forceShadersForNode)
+    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool translucentFramebuffer, bool forceShadersForNode, const osg::Program* programTemplate)
     {
         osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor(shaderPrefix, translucentFramebuffer));
         shaderVisitor->setAllowedToModifyStateSets(false);
+        shaderVisitor->setProgramTemplate(programTemplate);
         if (forceShadersForNode)
             shaderVisitor->setForceShaders(true);
         node->accept(*shaderVisitor);
@@ -404,6 +412,13 @@ namespace Resource
     void SceneManager::setLightingMethod(SceneUtil::LightingMethod method)
     {
         mLightingMethod = method;
+
+        if (mLightingMethod == SceneUtil::LightingMethod::SingleUBO)
+        {
+            osg::ref_ptr<osg::Program> program = new osg::Program;
+            program->addBindUniformBlock("LightBufferBinding", static_cast<int>(UBOBinding::LightBuffer));
+            mShaderManager->setProgramTemplate(program);
+        }
     }
 
     SceneUtil::LightingMethod SceneManager::getLightingMethod() const

@@ -825,8 +825,14 @@ namespace MWWorld
         // unload
         for (auto iter = mActiveCells.begin(); iter!=mActiveCells.end(); )
         {
-            auto* cell = *iter++;
-            unloadCell(cell);
+
+            auto* cellToUnload = *iter++;
+            unloadCell(cellToUnload);
+
+           
+            
+            
+
         }
         assert(mActiveCells.empty());
 
