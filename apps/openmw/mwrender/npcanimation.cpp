@@ -480,6 +480,12 @@ void NpcAnimation::updateNpcBase()
     if (!is1stPerson && !isWerewolf && !mNpc->mModel.empty())
         smodel = Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS());
 
+    if (mOverrideFieldOfViewCallback && mObjectRoot.get()))
+    {
+        mObjectRoot->removeCullCallback(mOverrideFieldOfViewCallback);
+        mOverrideFieldOfViewCallback = nullptr;
+    }
+
     setObjectRoot(smodel, true, true, false);
 
     updateParts();
@@ -507,7 +513,8 @@ void NpcAnimation::updateNpcBase()
         addAnimSource(smodel, smodel);
 
         mObjectRoot->setNodeMask(Mask_FirstPerson);
-        mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
+        mOverrideFieldOfViewCallback = new OverrideFieldOfViewCallback(mFirstPersonFieldOfView);
+        mObjectRoot->addCullCallback(mOverrideFieldOfViewCallback);
     }
 
     mWeaponAnimationTime->updateStartTime();
