@@ -69,6 +69,7 @@ private:
     osg::Vec3f mFirstPersonOffset;
     // Field of view to use when rendering first person meshes
     float mFirstPersonFieldOfView;
+    osg::ref_ptr<osg::Callback> mOverrideFieldOfViewCallback;
 
     std::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
     std::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
