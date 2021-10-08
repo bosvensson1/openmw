@@ -28,6 +28,8 @@
 
 #include <components/bsa/bsa_file.hpp>
 
+#include <map>
+
 namespace Bsa
 {
     enum BsaVersion
