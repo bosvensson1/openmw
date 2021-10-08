@@ -75,6 +75,14 @@ namespace Bsa
         std::map<std::uint64_t, FolderRecord> mFolders;
 
         FileRecord getFileRecord(const std::string& str) const;
+
+        struct iltstr
+        {
+            bool operator()(const std::string& s1, const std::string& s2) const
+            { return Misc::StringUtils::ciLess(s1, s2); }
+        };
+        typedef std::map<std::string, size_t, iltstr> Lookup;
+        Lookup mLookup;
         
         void getBZString(std::string& str, std::istream& filestream);
         //mFiles used by OpenMW will contain uncompressed file sizes
@@ -92,7 +100,6 @@ namespace Bsa
         /// Read header information from the input source
         void readHeader() override;
        
-        Files::IStreamPtr getFile(const char* filePath) override;
         Files::IStreamPtr getFile(const FileStruct* fileStruct) override;
         void addFile(const std::string& filename, std::istream& file) override;
     };
