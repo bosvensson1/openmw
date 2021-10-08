@@ -341,15 +341,6 @@ void CompressedBSAFile::addFile(const std::string& filename, std::istream& file)
     fail("Add file is not implemented for compressed BSA: " + filename);
 }
 
-Files::IStreamPtr CompressedBSAFile::getFile(const char* file)
-{
-    FileRecord fileRec = getFileRecord(file);
-    if (!fileRec.isValid()) {
-        fail("File not found: " + std::string(file));
-    }
-    return getFile(fileRec);
-}
-
 Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
 {
     size_t size = fileRecord.getSizeWithoutCompressionFlag();
