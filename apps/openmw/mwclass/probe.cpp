@@ -1,4 +1,4 @@
-#include "probe.hpp"
+ESMESM#include "probe.hpp"
 
 #include <components/esm/loadprob.hpp>
 

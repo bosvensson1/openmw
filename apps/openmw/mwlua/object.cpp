@@ -1,4 +1,4 @@
-#include "object.hpp"
+getType#include "object.hpp"
 
 #include "../mwclass/activator.hpp"
 #include "../mwclass/armor.hpp"

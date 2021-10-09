@@ -1,4 +1,4 @@
-#ifndef GAME_MWWORLD_PTR_H
+getType#ifndef GAME_MWWORLD_PTR_H
 #define GAME_MWWORLD_PTR_H
 
 #include <cassert>

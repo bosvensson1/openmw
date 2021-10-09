@@ -1,4 +1,4 @@
-#include "creatureanimation.hpp"
+getTypeESMESM#include "creatureanimation.hpp"
 
 #include <osg/MatrixTransform>
 

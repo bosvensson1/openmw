@@ -1,4 +1,4 @@
-#include "quickkeysmenu.hpp"
+getTypeESMESM#include "quickkeysmenu.hpp"
 
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Button.h>

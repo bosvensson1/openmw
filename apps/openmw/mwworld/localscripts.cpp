@@ -1,4 +1,4 @@
-#include "localscripts.hpp"
+getTypeESMESM#include "localscripts.hpp"
 
 #include <components/debug/debuglog.hpp>
 

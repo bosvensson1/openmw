@@ -1,4 +1,4 @@
-﻿#include "npc.hpp"
+﻿getTypeESMESM#include "npc.hpp"
 
 #include <memory>
 #include <climits> // INT_MIN

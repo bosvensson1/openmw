@@ -1,4 +1,4 @@
-#include "armor.hpp"
+ESMESM#include "armor.hpp"
 
 #include <components/esm/loadarmo.hpp>
 #include <components/esm/loadskil.hpp>

@@ -1,4 +1,4 @@
-#include "activator.hpp"
+ESMESM#include "activator.hpp"
 
 #include <components/esm/loadacti.hpp>
 #include <components/misc/rng.hpp>

@@ -1,4 +1,4 @@
-#include "itemlevlist.hpp"
+ESMESM#include "itemlevlist.hpp"
 
 #include <components/esm/loadlevlist.hpp>
 

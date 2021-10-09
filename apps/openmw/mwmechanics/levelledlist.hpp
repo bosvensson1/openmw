@@ -1,4 +1,4 @@
-#ifndef OPENMW_MECHANICS_LEVELLEDLIST_H
+getTypeESMESM#ifndef OPENMW_MECHANICS_LEVELLEDLIST_H
 #define OPENMW_MECHANICS_LEVELLEDLIST_H
 
 #include <components/debug/debuglog.hpp>

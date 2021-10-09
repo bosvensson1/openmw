@@ -1,4 +1,4 @@
-#include "inventorystore.hpp"
+getTypeESMESM#include "inventorystore.hpp"
 
 #include <iterator>
 #include <algorithm>

@@ -1,4 +1,4 @@
-#include "enchanting.hpp"
+ESMESM#include "enchanting.hpp"
 
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>

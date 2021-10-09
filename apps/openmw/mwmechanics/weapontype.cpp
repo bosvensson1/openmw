@@ -1,4 +1,4 @@
-#include "weapontype.hpp"
+getTypeESMESM#include "weapontype.hpp"
 
 #include "../mwworld/class.hpp"
 

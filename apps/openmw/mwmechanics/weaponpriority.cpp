@@ -1,4 +1,4 @@
-#include "weaponpriority.hpp"
+getType#include "weaponpriority.hpp"
 
 #include <components/esm/loadench.hpp>
 

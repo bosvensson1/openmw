@@ -1,4 +1,4 @@
-#include "manualref.hpp"
+::sRecordId#include "manualref.hpp"
 
 #include "esmstore.hpp"
 

@@ -1,4 +1,4 @@
-#include "trading.hpp"
+getTypeESMESM#include "trading.hpp"
 
 #include <components/misc/rng.hpp>
 

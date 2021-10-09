@@ -1,4 +1,4 @@
-#include "bodypart.hpp"
+ESMESM#include "bodypart.hpp"
 
 #include "../mwrender/renderinginterface.hpp"
 #include "../mwrender/objects.hpp"

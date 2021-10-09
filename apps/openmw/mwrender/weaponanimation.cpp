@@ -1,4 +1,4 @@
-#include "weaponanimation.hpp"
+getTypeESMESM#include "weaponanimation.hpp"
 
 #include <osg/MatrixTransform>
 

@@ -1,4 +1,4 @@
-#include "compilercontext.hpp"
+::sRecordId#include "compilercontext.hpp"
 
 #include "../mwworld/esmstore.hpp"
 

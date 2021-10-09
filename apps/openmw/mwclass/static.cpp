@@ -1,4 +1,4 @@
-#include "static.hpp"
+ESMESM#include "static.hpp"
 
 #include <components/esm/loadstat.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>

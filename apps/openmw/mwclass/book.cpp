@@ -1,4 +1,4 @@
-#include "book.hpp"
+ESMESM#include "book.hpp"
 
 #include <components/esm/loadbook.hpp>
 

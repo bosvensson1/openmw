@@ -1,4 +1,4 @@
-#include "apparatus.hpp"
+ESMESM#include "apparatus.hpp"
 
 #include <components/esm/loadappa.hpp>
 

@@ -1,4 +1,4 @@
-#include "objects.hpp"
+getTypeESMESM#include "objects.hpp"
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/loadcont.hpp>
