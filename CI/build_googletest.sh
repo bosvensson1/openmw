@@ -9,9 +9,9 @@ cmake \
     -D CMAKE_CXX_COMPILER="${CXX}" \
     -D CMAKE_C_COMPILER_LAUNCHER=ccache \
     -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
-    -D CMAKE_BUILD_TYPE="${CONFIGURATION}" \
-    -D CMAKE_INSTALL_PREFIX="${GOOGLETEST_DIR}" \
-    -G "${GENERATOR}" \
+    -D CMAKE_BUILD_TYPE="Release" \
+    -D CMAKE_INSTALL_PREFIX="$(pwd)/googletest/build/install" \
+    -G "Unix Makefiles" \
     ..
-cmake --build . --config "${CONFIGURATION}" -- -j $(nproc)
-cmake --install . --config "${CONFIGURATION}"
+cmake --build . --config "Release" -- -j $(nproc)
+cmake --install . --config "Release"
