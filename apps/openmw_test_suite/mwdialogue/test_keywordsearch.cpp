@@ -1,6 +1,11 @@
 #include <gtest/gtest.h>
 #include "apps/openmw/mwdialogue/keywordsearch.hpp"
 
+#include <iostream>
+#include <ctime>
+#include <ratio>
+#include <chrono>
+
 struct KeywordSearchTest : public ::testing::Test
 {
   protected:
@@ -21,10 +26,52 @@ TEST_F(KeywordSearchTest, keyword_test_conflict_resolution)
     search.seed("bar lock", 0);
     search.seed("lock switch", 0);
 
+using namespace std::chrono;
+
+
+high_resolution_clock::time_point t1 = high_resolution_clock::now();
+ 
+
+    int runs=100000;
+
+    {
+
+        for (int i=0; i<runs;++i)
+        {
+MWDialogue::KeywordSearch<std::string, int> search;
+    search.seed("foo bar", 0);
+    search.seed("bar lock", 0);
+    search.seed("lock switch", 0);
+
+        }
+
+    }
+
+high_resolution_clock::time_point t2 = high_resolution_clock::now();
+ duration<double, std::milli> time_span = t2 - t1;
+std::cout << "seed took me " << time_span.count() << " milliseconds.";
+  std::cout << std::endl;
+
     std::string text = "foo bar lock switch";
 
     std::vector<MWDialogue::KeywordSearch<std::string, int>::Match> matches;
-    search.highlightKeywords(text.begin(), text.end(), matches);
+ 
+  /*high_resolution_clock::time_point*/ t1 = high_resolution_clock::now();
+ 
+
+    for(int i=0;i<runs; ++i)
+    {
+matches.clear();
+        search.highlightKeywords(text.begin(), text.end(), matches);
+        
+    }
+
+/*high_resolution_clock::time_point*/ t2 = high_resolution_clock::now();
+ 
+ /* duration<double, std::milli>*/ time_span = t2 - t1;
+ 
+  std::cout << "highlightKeywords took me " << time_span.count() << " milliseconds.";
+  std::cout << std::endl;
 
     // Should contain: "foo bar", "lock switch"
     EXPECT_EQ (matches.size() , 2);
