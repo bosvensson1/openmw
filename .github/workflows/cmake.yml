@@ -17,6 +17,9 @@ jobs:
     - name: Add OpenMW PPA Dependancies
       run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
     
+    - name: Install gtest
+      run: env GENERATOR='Unix Makefiles' CONFIGURATION=Release sudo CI/build_googletest.sh
+
     - name: Install Building Dependancies
       run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
 
