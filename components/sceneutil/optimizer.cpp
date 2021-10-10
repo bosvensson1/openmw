@@ -673,6 +673,11 @@ void Optimizer::FlattenStaticTransformsVisitor::apply(osg::Transform& transform)
     _transformStack.pop_back();
 }
 
+void Optimizer::FlattenStaticTransformsVisitor::apply(osg::MatrixTransform& node)
+{
+    apply(static_cast<osg::Transform&>(node));
+}
+
 bool Optimizer::FlattenStaticTransformsVisitor::removeTransforms(osg::Node* nodeWeCannotRemove)
 {
     CollectLowestTransformsVisitor cltv(_optimizer);
