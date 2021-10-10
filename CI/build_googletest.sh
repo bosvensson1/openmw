@@ -6,7 +6,7 @@ mkdir build
 cd build
 cmake \
     -D CMAKE_BUILD_TYPE="Release" \
-    -D CMAKE_INSTALL_PREFIX="$(pwd)/googletest/build/install" \
+    -D CMAKE_INSTALL_PREFIX="$(pwd)/install" \
     -G "Unix Makefiles" \
     ..
 cmake --build . --config "Release" -- -j $(nproc)
