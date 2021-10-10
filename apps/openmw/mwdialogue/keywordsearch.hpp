@@ -2,7 +2,7 @@
 #define GAME_MWDIALOGUE_KEYWORDSEARCH_H
 
 #include <cctype>
-#include <map>
+#include <unordered_map>
 #include <stdexcept>
 #include <vector>
 #include <algorithm>    // std::reverse
@@ -194,7 +194,7 @@ private:
 
     struct Entry
     {
-        typedef std::map <wchar_t, Entry> childen_t;
+        typedef std::unordered_map <wchar_t, Entry> childen_t;
 
         string_t mKeyword;
         value_t mValue;
