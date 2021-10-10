@@ -31,20 +31,7 @@ jobs:
 
     - name: Build
       run: cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
+
+    - name: Test
+      run: ./openmw_test_suite --gtest_filter=keyword_test_conflict_resolution
  
-    - name: Install
-      shell: bash
-      run: cmake --install .
-      
-    - name: Create Artifact
-      shell: bash
-      working-directory: install
-      run: |
-        ls -laR
-        7z a ../build_artifact.7z .
-        
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v1
-      with:
-        path: ./build_artifact.7z
-        name: build_artifact.7z
