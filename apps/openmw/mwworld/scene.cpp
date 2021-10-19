@@ -106,10 +106,10 @@ namespace
 
         const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile() || pagedRefs.find(refnum) == pagedRefs.end())
+        {
             ptr.getClass().insertObjectRendering(ptr, model, rendering);
-        else
-            ptr.getRefData().setBaseNode(new SceneUtil::PositionAttitudeTransform); // FIXME remove this when physics code is fixed not to depend on basenode
-        setNodeRotation(ptr, rendering, rotation);
+            setNodeRotation(ptr, rendering, rotation);
+        }
 
         if (ptr.getClass().useAnim())
             MWBase::Environment::get().getMechanicsManager()->add(ptr);
@@ -255,7 +255,6 @@ namespace MWWorld
         const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
         if (refnum.hasContentFile() && mPagedRefs.erase(refnum))
         {
-            if (!ptr.getRefData().getBaseNode()) return;
             ptr.getClass().insertObjectRendering(ptr, getModel(ptr, mRendering.getResourceSystem()->getVFS()), mRendering);
             setNodeRotation(ptr, mRendering, makeNodeRotation(ptr, RotationOrder::direct));
             reloadTerrain();
