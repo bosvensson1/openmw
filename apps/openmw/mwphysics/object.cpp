@@ -118,7 +118,8 @@ namespace MWPhysics
             if (nodePathFound == mRecIndexToNodePath.end())
             {
                 NifOsg::FindGroupByRecIndex visitor(recIndex);
-                mPtr.getRefData().getBaseNode()->accept(visitor);
+                if (osg::Node* baseNode = mPtr.getRefData().getBaseNode())
+                    baseNode->accept(visitor);
                 if (!visitor.mFound)
                 {
                     Log(Debug::Warning) << "Warning: animateCollisionShapes can't find node " << recIndex << " for " << mPtr.getCellRef().getRefId();
