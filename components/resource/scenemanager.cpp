@@ -478,7 +478,7 @@ namespace Resource
     {
         auto ext = Misc::getFileExtension(normalizedFilename);
         if (ext == "nif")
-            return NifOsg::Loader::load(nifFileManager->get(normalizedFilename), imageManager);
+            return NifOsg::Loader::load(nifFileManager->consume(normalizedFilename), imageManager);
         else
         {
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(std::string(ext));
