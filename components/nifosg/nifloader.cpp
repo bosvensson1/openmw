@@ -1133,10 +1133,10 @@ namespace NifOsg
             }
         }
 
-        template <typename ArrayType, typename InputType, typename... Args>
-        osg::ref_ptr<ArrayType> moveArray(InputType& input, Args... args)
+        template <typename ArrayType, typename InputType>
+        osg::ref_ptr<ArrayType> moveArray(InputType& input)
         {
-            osg::ref_ptr<ArrayType> array = new ArrayType(args...);
+            osg::ref_ptr<ArrayType> array = new ArrayType;
             array->swap(input);
             return array;
         }
@@ -1176,6 +1176,14 @@ namespace NifOsg
             }
         }
 
+        template <typename ArrayType, typename InputType>
+        osg::ref_ptr<ArrayType> movePrimitiveSet(InputType& input, osg::PrimitiveSet::Mode mode)
+        {
+            osg::ref_ptr<ArrayType> array = new ArrayType(mode);
+            array->swap(input);
+            return array;
+        }
+
         void handleNiGeometry(Nif::Node *nifNode, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
         {
             Nif::NiGeometry* niGeometry = static_cast<Nif::NiGeometry*>(nifNode);
@@ -1190,7 +1198,7 @@ namespace NifOsg
                 auto triangles = static_cast<Nif::NiTriShapeData*>(niGeometryData)->triangles;
                 if (triangles.empty())
                     return;
-                geometry->addPrimitiveSet(moveArray<osg::DrawElementsUShort>(triangles, osg::PrimitiveSet::TRIANGLES));
+                geometry->addPrimitiveSet(movePrimitiveSet<osg::DrawElementsUShort>(triangles, osg::PrimitiveSet::TRIANGLES));
             }
             else if (niGeometry->recType == Nif::RC_NiTriStrips)
             {
@@ -1202,7 +1210,7 @@ namespace NifOsg
                 {
                     if (strip.size() < 3)
                         continue;
-                    geometry->addPrimitiveSet(moveArray<osg::DrawElementsUShort>(strip, osg::PrimitiveSet::TRIANGLE_STRIP));
+                    geometry->addPrimitiveSet(movePrimitiveSet<osg::DrawElementsUShort>(strip, osg::PrimitiveSet::TRIANGLE_STRIP));
                     hasGeometry = true;
                 }
                 if (!hasGeometry)
@@ -1216,7 +1224,7 @@ namespace NifOsg
                 auto& line = data->lines;
                 if (line.empty())
                     return;
-                geometry->addPrimitiveSet(moveArray<osg::DrawElementsUShort>(line, osg::PrimitiveSet::LINES));
+                geometry->addPrimitiveSet(movePrimitiveSet<osg::DrawElementsUShort>(line, osg::PrimitiveSet::LINES));
             }
             handleNiGeometryData(geometry, niGeometryData, boundTextures, nifNode->name);
 
