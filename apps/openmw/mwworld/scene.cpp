@@ -115,6 +115,9 @@ namespace
         std::string model = getModel(ptr, rendering.getResourceSystem()->getVFS());
         const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);
 
+        ptr.getClass().insertObject (ptr, model, rotation, physics);
+
+        // Loading OSG objects after physics objects is most ideal because NifOsg::Loader will consume the cached NIFFile.
         const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile() || pagedRefs.find(refnum) == pagedRefs.end())
             ptr.getClass().insertObjectRendering(ptr, model, rendering);
@@ -130,8 +133,6 @@ namespace
 
         // Restore effect particles
         MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
-
-        ptr.getClass().insertObject (ptr, model, rotation, physics);
 
         MWBase::Environment::get().getLuaManager()->objectAddedToScene(ptr);
     }
