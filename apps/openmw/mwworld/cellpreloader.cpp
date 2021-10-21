@@ -133,12 +133,13 @@ namespace MWWorld
                             }
                         }
                     }
-                    mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
+
                     if (mPreloadInstances)
                         mPreloadedObjects.insert(mBulletShapeManager->cacheInstance(mesh));
                     else
                         mPreloadedObjects.insert(mBulletShapeManager->getShape(mesh));
-
+                    // Loading OSG objects after physics objects is most ideal because NifOsg::Loader will consume the cached NIFFile.
+                    mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
                 }
                 catch (std::exception&)
                 {
