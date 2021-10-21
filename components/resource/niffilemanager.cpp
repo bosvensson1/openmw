@@ -28,7 +28,7 @@ namespace Resource
 
         META_Object(Resource, NifFileHolder)
 
-        Nif::NIFFilePtr mNifFile;
+        Nif::MutableNIFFilePtr mNifFile;
     };
 
     NifFileManager::NifFileManager(const VFS::Manager *vfs)
@@ -38,9 +38,7 @@ namespace Resource
 
     NifFileManager::~NifFileManager()
     {
-
     }
-
 
     Nif::NIFFilePtr NifFileManager::get(const std::string &name)
     {
@@ -49,11 +47,20 @@ namespace Resource
             return static_cast<NifFileHolder*>(obj.get())->mNifFile;
         else
         {
-            Nif::NIFFilePtr file (new Nif::NIFFile(mVFS->get(name), name));
+            Nif::MutableNIFFilePtr file (new Nif::NIFFile(mVFS->get(name), name));
             obj = new NifFileHolder(file);
             mCache->addEntryToObjectCache(name, obj);
             return file;
         }
+    }
+
+    Nif::MutableNIFFilePtr NifFileManager::consume(const std::string &name)
+    {
+        osg::ref_ptr<osg::Object> obj = mCache->consumeRefFromObjectCache(name);
+        if (obj)
+            return static_cast<NifFileHolder*>(obj.get())->mNifFile;
+        else
+            return Nif::MutableNIFFilePtr(new Nif::NIFFile(mVFS->get(name), name);
     }
 
     void NifFileManager::reportStats(unsigned int frameNumber, osg::Stats *stats) const
