@@ -278,7 +278,7 @@ namespace NifOsg
             }
         }
 
-        osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::ImageManager* imageManager)
+        osg::ref_ptr<osg::Node> load(Nif::MutableNIFFilePtr nif, Resource::ImageManager* imageManager)
         {
             const size_t numRoots = nif->numRoots();
             std::vector<Nif::Node*> roots;
