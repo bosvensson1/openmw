@@ -18,11 +18,13 @@ struct File
 {
     virtual ~File() = default;
 
-    virtual Record *getRecord(size_t index) const = 0;
+    virtual Record *getRecord(size_t index) = 0;
+    virtual const Record *getRecord(size_t index) const = 0;
 
     virtual size_t numRecords() const = 0;
 
-    virtual Record *getRoot(size_t index = 0) const = 0;
+    virtual Record *getRoot(size_t index = 0) = 0;
+    virtual const Record *getRoot(size_t index = 0) const = 0;
 
     virtual size_t numRoots() const = 0;
 
@@ -107,19 +109,25 @@ public:
     ~NIFFile();
 
     /// Get a given record
-    Record *getRecord(size_t index) const override
+    Record *getRecord(size_t index) override
     {
-        Record *res = records.at(index);
-        return res;
+        return records.at(index);
+    }
+    const Record *getRecord(size_t index) const override
+    {
+        return records.at(index);
     }
     /// Number of records
     size_t numRecords() const override { return records.size(); }
 
     /// Get a given root
-    Record *getRoot(size_t index=0) const override
+    Record *getRoot(size_t index=0) override
     {
-        Record *res = roots.at(index);
-        return res;
+        return roots.at(index);
+    }
+    const Record *getRoot(size_t index=0) const override
+    {
+        return roots.at(index);
     }
     /// Number of roots
     size_t numRoots() const override { return roots.size(); }
@@ -153,7 +161,7 @@ public:
     static void setLoadUnsupportedFiles(bool load);
 };
 using NIFFilePtr = std::shared_ptr<const Nif::NIFFile>;
-
+using MutableNIFFilePtr = std::shared_ptr<Nif::NIFFile>;
 
 
 } // Namespace
