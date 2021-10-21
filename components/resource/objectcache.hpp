@@ -122,6 +122,20 @@ class GenericObjectCache : public osg::Referenced
             else return nullptr;
         }
 
+        /** Get an ref_ptr<Object> from the object cache and remove it from the cache*/
+        osg::ref_ptr<osg::Object> consumeRefFromObjectCache(const KeyType& key)
+        {
+            std::lock_guard<std::mutex> lock(_objectCacheMutex);
+            typename ObjectCacheMap::iterator itr = _objectCache.find(key);
+            if (itr!=_objectCache.end())
+            {
+                osg::ref_ptr<osg::Object> obj = itr->second.first;
+                _objectCache.erase(itr);
+                return obj;
+            }
+            else return nullptr;
+        }
+
         /** Check if an object is in the cache, and if it is, update its usage time stamp. */
         bool checkInObjectCache(const KeyType& key, double timeStamp)
         {
