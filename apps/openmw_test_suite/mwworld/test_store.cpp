@@ -90,7 +90,7 @@ struct ContentFileTest : public ::testing::Test
         for (auto & contentFile : contentFiles)
             mContentFiles.push_back(collections.getPath(contentFile));
 
-        mContentFiles.emplace_back("fetched/example_suite_template_game/template.omwgame");
+        mContentFiles.emplace_back("apps/openmw_test_suite/fetched/example_suite_template_game/template.omwgame");
     }
 
 protected:
