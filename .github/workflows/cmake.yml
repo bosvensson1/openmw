@@ -42,7 +42,7 @@ jobs:
       run: cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
  
     - name: Test
-      run: ./openmw_test_suite
+      run: ./openmw_test_suite --content="apps/openmw_test_suite/fetched/example_suite_template_game/template.omwgame"
 
 #    - name: Install
 #      shell: bash
