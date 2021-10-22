@@ -42,7 +42,7 @@ jobs:
       run: cmake -DBUILD_OPENMW=0 -DBUILD_LAUNCHER=0 -DBUILD_WIZARD=0 -DBUILD_MWINIIMPORTER=0 -DBUILD_OPENCS=0 -DBUILD_ESSIMPORTER=0 -DBUILD_BSATOOL=0 -DBUILD_ESMTOOL=0 -DBUILD_NIFTEST=0 --build . --config ${{env.BUILD_TYPE}} --parallel 3
  
     - name: Test
-      run: ./openmw_test_suite --content="apps/openmw_test_suite/fetched/example_suite_template_game/template.omwgame"
+      run: ./openmw_test_suite --data="fetched/example_suite_template_game/" --content="template.omwgame"
 
 #    - name: Install
 #      shell: bash
