@@ -186,6 +186,8 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 
 
 std::chrono::duration<double> elapsed;
+auto start = std::chrono::system_clock::now(); // This and "end"'s type is std::chrono::time_point
+
     
     // Loop through all records
     while(esm.hasMoreRecs())
@@ -199,8 +201,7 @@ std::chrono::duration<double> elapsed;
   
         if (it == mStores.end()) {
             if (n.toInt() == ESM::REC_INFO) {
-   auto start = std::chrono::system_clock::now(); // This and "end"'s type is std::chrono::time_point
-
+   
                 if (dialogue)
                 {
                     dialogue->readInfo(esm, esm.getIndex() != 0);
@@ -210,9 +211,6 @@ std::chrono::duration<double> elapsed;
                     Log(Debug::Error) << "Error: info record without dialog";
                     esm.skipRecord();
                 }
-auto end = std::chrono::system_clock::now();
-       elapsed = elapsed + (end - start);
-    
 
             } else if (n.toInt() == ESM::REC_MGEF) {
                 mMagicEffects.load (esm);
@@ -244,7 +242,10 @@ auto end = std::chrono::system_clock::now();
         listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
 
     }
-std::cout << "readInfo() Elapsed time: " << std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() << "us";
+auto end = std::chrono::system_clock::now();
+       elapsed = elapsed + (end - start);
+    
+std::cout << "load() Elapsed time: " << std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() << "us";
 
 }
 
