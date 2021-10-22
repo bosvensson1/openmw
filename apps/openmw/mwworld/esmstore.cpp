@@ -185,7 +185,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     }
 
 
-std::chrono::microseconds elapsed;
+std::chrono::duration<double> elapsed;
     
     // Loop through all records
     while(esm.hasMoreRecs())
@@ -244,7 +244,7 @@ auto end = std::chrono::system_clock::now();
         listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
 
     }
-std::cout << "readInfo() Elapsed time: " << elapsed.count() << "us";
+std::cout << "readInfo() Elapsed time: " << elapsed.count() << "s";
 
 }
 
