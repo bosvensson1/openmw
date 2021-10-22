@@ -89,6 +89,8 @@ struct ContentFileTest : public ::testing::Test
         std::vector<std::string> contentFiles = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
         for (auto & contentFile : contentFiles)
             mContentFiles.push_back(collections.getPath(contentFile));
+
+        mContentFiles.emplace_back("fetched/example_suite_template_game/template.omwgame");
     }
 
 protected:
