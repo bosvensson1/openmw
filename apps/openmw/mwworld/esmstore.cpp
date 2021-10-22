@@ -244,7 +244,7 @@ auto end = std::chrono::system_clock::now();
         listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
 
     }
-std::cout << "readInfo() Elapsed time: " << elapsed.count() << "s";
+std::cout << "readInfo() Elapsed time: " << std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() << "us";
 
 }
 
