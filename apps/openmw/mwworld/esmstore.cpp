@@ -185,7 +185,8 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     }
 
 
-
+std::chrono::microseconds elapsed;
+    
     // Loop through all records
     while(esm.hasMoreRecs())
     {
@@ -194,9 +195,6 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 
         // Look up the record type.
         std::map<int, StoreBase *>::iterator it = mStores.find(n.toInt());
-
-  std::chrono::duration<double> elapsed;
-    
     
   
         if (it == mStores.end()) {
@@ -244,10 +242,10 @@ auto end = std::chrono::system_clock::now();
             }
         }
         listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
-std::cout << "readInfo() Elapsed time: " << elapsed.count() << "s";
-
 
     }
+std::cout << "readInfo() Elapsed time: " << elapsed.count() << "us";
+
 }
 
 void ESMStore::setUp(bool validateRecords)
