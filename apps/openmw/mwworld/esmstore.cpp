@@ -195,7 +195,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         // Look up the record type.
         std::map<int, StoreBase *>::iterator it = mStores.find(n.toInt());
 
-  std::chrono::duration<double> elapsed = 0.0;
+  std::chrono::duration<double> elapsed;
     
     
   
