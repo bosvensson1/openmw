@@ -10,6 +10,7 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/misc/algorithm.hpp>
+#include <chrono>
 
 #include "../mwmechanics/spelllist.hpp"
 
@@ -183,6 +184,11 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         esm.addParentFileIndex(index);
     }
 
+
+std::chrono::duration<double> elapsed;
+auto start = std::chrono::system_clock::now(); // This and "end"'s type is std::chrono::time_point
+
+    
     // Loop through all records
     while(esm.hasMoreRecs())
     {
@@ -191,9 +197,11 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 
         // Look up the record type.
         std::map<int, StoreBase *>::iterator it = mStores.find(n.toInt());
-
+    
+  
         if (it == mStores.end()) {
             if (n.toInt() == ESM::REC_INFO) {
+   
                 if (dialogue)
                 {
                     dialogue->readInfo(esm, esm.getIndex() != 0);
@@ -203,6 +211,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                     Log(Debug::Error) << "Error: info record without dialog";
                     esm.skipRecord();
                 }
+
             } else if (n.toInt() == ESM::REC_MGEF) {
                 mMagicEffects.load (esm);
             } else if (n.toInt() == ESM::REC_SKIL) {
@@ -231,7 +240,13 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             }
         }
         listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
+
     }
+auto end = std::chrono::system_clock::now();
+       elapsed = elapsed + (end - start);
+    
+std::cout << "load() Elapsed time: " << std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() << "us";
+
 }
 
 void ESMStore::setUp(bool validateRecords)
