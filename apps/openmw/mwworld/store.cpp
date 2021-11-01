@@ -38,8 +38,8 @@ namespace MWWorld
         bool isDeleted = false;
 
         record.load(esm, isDeleted);
-        auto idx = record.mIndex;
-        mStatic.insert_or_assign(idx, std::move(record));
+
+        mStatic.insert_or_assign(record.mIndex, record);
     }
     template<typename T>
     int IndexedStore<T>::getSize() const
@@ -98,11 +98,13 @@ namespace MWWorld
     template<typename T>
     const T *Store<T>::search(const std::string &id) const
     {
-        typename Dynamic::const_iterator dit = mDynamic.find(id);
+        std::string idLower = Misc::StringUtils::lowerCase(id);
+
+        typename Dynamic::const_iterator dit = mDynamic.find(idLower);
         if (dit != mDynamic.end())
             return &dit->second;
 
-        typename Static::const_iterator it = mStatic.find(id);
+        typename std::map<std::string, T>::const_iterator it = mStatic.find(idLower);
         if (it != mStatic.end())
             return &(it->second);
 
@@ -111,7 +113,8 @@ namespace MWWorld
     template<typename T>
     const T *Store<T>::searchStatic(const std::string &id) const
     {
-        typename Static::const_iterator it = mStatic.find(id);
+        std::string idLower = Misc::StringUtils::lowerCase(id);
+        typename std::map<std::string, T>::const_iterator it = mStatic.find(idLower);
         if (it != mStatic.end())
             return &(it->second);
 
@@ -156,7 +159,7 @@ namespace MWWorld
         bool isDeleted = false;
 
         record.load(esm, isDeleted);
-        Misc::StringUtils::lowerCaseInPlace(record.mId); // TODO: remove this line once we have ported our remaining code base to lowercase on lookup
+        Misc::StringUtils::lowerCaseInPlace(record.mId);
 
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert_or_assign(record.mId, record);
         if (inserted.second)
@@ -203,13 +206,14 @@ namespace MWWorld
     template<typename T>
     T *Store<T>::insert(const T &item, bool overrideOnly)
     {
+        std::string id = Misc::StringUtils::lowerCase(item.mId);
         if(overrideOnly)
         {
-            auto it = mStatic.find(item.mId);
+            auto it = mStatic.find(id);
             if(it == mStatic.end())
                 return nullptr;
         }
-        std::pair<typename Dynamic::iterator, bool> result = mDynamic.insert_or_assign(item.mId, item);
+        std::pair<typename Dynamic::iterator, bool> result = mDynamic.insert_or_assign(id, item);
         T *ptr = &result.first->second;
         if (result.second)
             mShared.push_back(ptr);
@@ -218,7 +222,8 @@ namespace MWWorld
     template<typename T>
     T *Store<T>::insertStatic(const T &item)
     {
-        std::pair<typename Static::iterator, bool> result = mStatic.insert_or_assign(item.mId, item);
+        std::string id = Misc::StringUtils::lowerCase(item.mId);
+        std::pair<typename Static::iterator, bool> result = mStatic.insert_or_assign(id, item);
         T *ptr = &result.first->second;
         if (result.second)
             mShared.push_back(ptr);
@@ -227,7 +232,9 @@ namespace MWWorld
     template<typename T>
     bool Store<T>::eraseStatic(const std::string &id)
     {
-        typename Static::iterator it = mStatic.find(id);
+        std::string idLower = Misc::StringUtils::lowerCase(id);
+
+        typename std::map<std::string, T>::iterator it = mStatic.find(idLower);
 
         if (it != mStatic.end()) {
             // delete from the static part of mShared
@@ -235,7 +242,7 @@ namespace MWWorld
             typename std::vector<T *>::iterator end = sharedIter + mStatic.size();
 
             while (sharedIter != mShared.end() && sharedIter != end) {
-                if(Misc::StringUtils::ciEqual((*sharedIter)->mId, id)) {
+                if((*sharedIter)->mId == idLower) {
                     mShared.erase(sharedIter);
                     break;
                 }
@@ -250,13 +257,17 @@ namespace MWWorld
     template<typename T>
     bool Store<T>::erase(const std::string &id)
     {
-        if (!mDynamic.erase(id))
+        std::string key = Misc::StringUtils::lowerCase(id);
+        typename Dynamic::iterator it = mDynamic.find(key);
+        if (it == mDynamic.end()) {
             return false;
+        }
+        mDynamic.erase(it);
 
         // have to reinit the whole shared part
         assert(mShared.size() >= mStatic.size());
         mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
-        for (auto it = mDynamic.begin(); it != mDynamic.end(); ++it) {
+        for (it = mDynamic.begin(); it != mDynamic.end(); ++it) {
             mShared.push_back(&it->second);
         }
         return true;
@@ -342,8 +353,12 @@ namespace MWWorld
             ESM::LandTexture* tex = const_cast<ESM::LandTexture*>(search(lt.mIndex, i));
             if (tex)
             {
-                if (Misc::StringUtils::ciEqual(tex->mId, lt.mId))
+                const std::string texId = Misc::StringUtils::lowerCase(tex->mId);
+                const std::string ltId = Misc::StringUtils::lowerCase(lt.mId);
+                if (texId == ltId)
+                {
                     tex->mTexture = lt.mTexture;
+                }
             }
         }
 
@@ -352,10 +367,9 @@ namespace MWWorld
             ltexl.resize(lt.mIndex+1);
 
         // Store it
-        auto idx = lt.mIndex;
-        ltexl[idx] = std::move(lt);
+        ltexl[lt.mIndex] = lt;
 
-        return RecordId(ltexl[idx].mId, isDeleted);
+        return RecordId(lt.mId, isDeleted);
     }
     RecordId Store<ESM::LandTexture>::load(ESM::ESMReader &esm)
     {
@@ -489,12 +503,16 @@ namespace MWWorld
     }
     const ESM::Cell *Store<ESM::Cell>::search(const std::string &id) const
     {
-        DynamicInt::const_iterator it = mInt.find(id);
+        ESM::Cell cell;
+        cell.mName = Misc::StringUtils::lowerCase(id);
+
+        std::map<std::string, ESM::Cell>::const_iterator it = mInt.find(cell.mName);
+
         if (it != mInt.end()) {
             return &(it->second);
         }
 
-        DynamicInt::const_iterator dit = mDynamicInt.find(id);
+        DynamicInt::const_iterator dit = mDynamicInt.find(cell.mName);
         if (dit != mDynamicInt.end()) {
             return &dit->second;
         }
@@ -503,34 +521,48 @@ namespace MWWorld
     }
     const ESM::Cell *Store<ESM::Cell>::search(int x, int y) const
     {
+        ESM::Cell cell;
+        cell.mData.mX = x;
+        cell.mData.mY = y;
+
         std::pair<int, int> key(x, y);
         DynamicExt::const_iterator it = mExt.find(key);
-        if (it != mExt.end())
+        if (it != mExt.end()) {
             return &(it->second);
+        }
 
         DynamicExt::const_iterator dit = mDynamicExt.find(key);
-        if (dit != mDynamicExt.end())
+        if (dit != mDynamicExt.end()) {
             return &dit->second;
+        }
 
         return nullptr;
     }
     const ESM::Cell *Store<ESM::Cell>::searchStatic(int x, int y) const
     {
-        DynamicExt::const_iterator it = mExt.find(std::make_pair(x,y));
-        if (it != mExt.end())
+        ESM::Cell cell;
+        cell.mData.mX = x;
+        cell.mData.mY = y;
+
+        std::pair<int, int> key(x, y);
+        DynamicExt::const_iterator it = mExt.find(key);
+        if (it != mExt.end()) {
             return &(it->second);
+        }
         return nullptr;
     }
     const ESM::Cell *Store<ESM::Cell>::searchOrCreate(int x, int y)
     {
         std::pair<int, int> key(x, y);
         DynamicExt::const_iterator it = mExt.find(key);
-        if (it != mExt.end())
+        if (it != mExt.end()) {
             return &(it->second);
+        }
 
         DynamicExt::const_iterator dit = mDynamicExt.find(key);
-        if (dit != mDynamicExt.end())
+        if (dit != mDynamicExt.end()) {
             return &dit->second;
+        }
 
         ESM::Cell newCell;
         newCell.mData.mX = x;
@@ -593,11 +625,12 @@ namespace MWWorld
         // Load the (x,y) coordinates of the cell, if it is an exterior cell,
         // so we can find the cell we need to merge with
         cell.loadNameAndData(esm, isDeleted);
+        std::string idLower = Misc::StringUtils::lowerCase(cell.mName);
 
         if(cell.mData.mFlags & ESM::Cell::Interior)
         {
             // Store interior cell by name, try to merge with existing parent data.
-            ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(cell.mName));
+            ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(idLower));
             if (oldcell) {
                 // merge new cell into old cell
                 // push the new references on the list of references to manage (saveContext = true)
@@ -609,7 +642,7 @@ namespace MWWorld
                 // spawn a new cell
                 cell.loadCell(esm, true);
 
-                mInt[cell.mName] = cell;
+                mInt[idLower] = cell;
             }
         }
         else
@@ -747,19 +780,27 @@ namespace MWWorld
             const std::string cellType = (cell.isExterior()) ? "exterior" : "interior";
             throw std::runtime_error("Failed to create " + cellType + " cell");
         }
+        ESM::Cell *ptr;
         if (cell.isExterior()) {
             std::pair<int, int> key(cell.getGridX(), cell.getGridY());
 
             // duplicate insertions are avoided by search(ESM::Cell &)
-            DynamicExt::iterator result = mDynamicExt.emplace(key, cell).first;
-            mSharedExt.push_back(&result->second);
-            return &result->second;
+            std::pair<DynamicExt::iterator, bool> result =
+                mDynamicExt.insert(std::make_pair(key, cell));
+
+            ptr = &result.first->second;
+            mSharedExt.push_back(ptr);
         } else {
+            std::string key = Misc::StringUtils::lowerCase(cell.mName);
+
             // duplicate insertions are avoided by search(ESM::Cell &)
-            DynamicInt::iterator result = mDynamicInt.emplace(cell.mName, cell).first;
-            mSharedInt.push_back(&result->second);
-            return &result->second;
+            std::pair<DynamicInt::iterator, bool> result =
+                mDynamicInt.insert(std::make_pair(key, cell));
+
+            ptr = &result.first->second;
+            mSharedInt.push_back(ptr);
         }
+        return ptr;
     }
     bool Store<ESM::Cell>::erase(const ESM::Cell &cell)
     {
@@ -770,7 +811,8 @@ namespace MWWorld
     }
     bool Store<ESM::Cell>::erase(const std::string &id)
     {
-        DynamicInt::iterator it = mDynamicInt.find(id);
+        std::string key = Misc::StringUtils::lowerCase(id);
+        DynamicInt::iterator it = mDynamicInt.find(key);
 
         if (it == mDynamicInt.end()) {
             return false;
@@ -1020,11 +1062,12 @@ namespace MWWorld
 
         dialogue.loadId(esm);
 
-        Static::iterator found = mStatic.find(dialogue.mId);
+        std::string idLower = Misc::StringUtils::lowerCase(dialogue.mId);
+        std::map<std::string, ESM::Dialogue>::iterator found = mStatic.find(idLower);
         if (found == mStatic.end())
         {
             dialogue.loadData(esm, isDeleted);
-            mStatic.emplace(dialogue.mId, dialogue);
+            mStatic.insert(std::make_pair(idLower, dialogue));
         }
         else
         {
@@ -1038,7 +1081,11 @@ namespace MWWorld
     template<>
     bool Store<ESM::Dialogue>::eraseStatic(const std::string &id)
     {
-        mStatic.erase(id);
+        auto it = mStatic.find(Misc::StringUtils::lowerCase(id));
+
+        if (it != mStatic.end())
+            mStatic.erase(it);
+
         return true;
     }
 

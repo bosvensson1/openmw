@@ -5,7 +5,6 @@
 #include <vector>
 #include <memory>
 #include <map>
-#include <unordered_map>
 #include <set>
 
 #include "recordcmp.hpp"
@@ -148,13 +147,14 @@ namespace MWWorld
     template <class T>
     class Store : public StoreBase
     {
-        typedef std::unordered_map<std::string, T, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Static;
-        Static mStatic;
-        std::vector<T*> mShared; // Preserves the record order as it came from the content files (this
+        std::map<std::string, T>      mStatic;
+        std::vector<T *>    mShared; // Preserves the record order as it came from the content files (this
                                      // is relevant for the spell autocalc code and selection order
                                      // for heads/hairs in the character creation)
-        typedef std::unordered_map<std::string, T, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Dynamic;
-        Dynamic mDynamic;
+        std::map<std::string, T> mDynamic;
+
+        typedef std::map<std::string, T> Dynamic;
+        typedef std::map<std::string, T> Static;
 
         friend class ESMStore;
 
@@ -294,7 +294,7 @@ namespace MWWorld
             }
         };
 
-        typedef std::unordered_map<std::string, ESM::Cell, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> DynamicInt;
+        typedef std::map<std::string, ESM::Cell>                           DynamicInt;
         typedef std::map<std::pair<int, int>, ESM::Cell, DynamicExtCmp>    DynamicExt;
 
         DynamicInt      mInt;
@@ -354,7 +354,7 @@ namespace MWWorld
     class Store<ESM::Pathgrid> : public StoreBase
     {
     private:
-        typedef std::unordered_map<std::string, ESM::Pathgrid, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> Interior;
+        typedef std::map<std::string, ESM::Pathgrid> Interior;
         typedef std::map<std::pair<int, int>, ESM::Pathgrid> Exterior;
 
         Interior mInt;

@@ -75,17 +75,16 @@ namespace MWWorld
 
         // Lookup of all IDs. Makes looking up references faster. Just
         // maps the id name to the record type.
-        using IDMap = std::unordered_map<std::string, int, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>;
-        IDMap mIds;
-        IDMap mStaticIds;
+        std::map<std::string, int> mIds;
+        std::map<std::string, int> mStaticIds;
 
-        IDMap mRefCount;
+        std::unordered_map<std::string, int> mRefCount;
 
         std::map<int, StoreBase *> mStores;
 
         unsigned int mDynamicCount;
 
-        mutable std::unordered_map<std::string, std::weak_ptr<MWMechanics::SpellList>, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual> mSpellListCache;
+        mutable std::map<std::string, std::weak_ptr<MWMechanics::SpellList> > mSpellListCache;
 
         /// Validate entries in store after setup
         void validate();
@@ -116,9 +115,10 @@ namespace MWWorld
         }
 
         /// Look up the given ID in 'all'. Returns 0 if not found.
+        /// \note id must be in lower case.
         int find(const std::string &id) const
         {
-            IDMap::const_iterator it = mIds.find(id);
+            std::map<std::string, int>::const_iterator it = mIds.find(id);
             if (it == mIds.end()) {
                 return 0;
             }
@@ -126,7 +126,7 @@ namespace MWWorld
         }
         int findStatic(const std::string &id) const
         {
-            IDMap::const_iterator it = mStaticIds.find(id);
+            std::map<std::string, int>::const_iterator it = mStaticIds.find(id);
             if (it == mStaticIds.end()) {
                 return 0;
             }
