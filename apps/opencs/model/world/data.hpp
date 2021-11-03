@@ -115,11 +115,12 @@ namespace CSMWorld
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
             ESM::ESMReader *mReader;
+            int mCurrentReaderIndex = 0;
             const ESM::Dialogue *mDialogue; // last loaded dialogue
             bool mBase;
             bool mProject;
             std::map<std::string, std::map<unsigned int, unsigned int> > mRefLoadCache;
-            int mReaderIndex;
+            int mCountReaders;
 
             bool mFsStrict;
             Files::PathContainer mDataPaths;
@@ -129,8 +130,6 @@ namespace CSMWorld
             std::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
             std::vector<std::shared_ptr<ESM::ESMReader> > mReaders;
-
-            std::map<std::string, int> mContentFileNames;
 
             // not implemented
             Data (const Data&);
