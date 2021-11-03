@@ -33,7 +33,7 @@ namespace
         else
         {
             // This is an addition by the present plugin. Set the corresponding plugin index.
-            refNum.mContentFile = reader.getIndex();
+            refNum.mContentFile = reader.getThisIndex();
         }
     }
 }
