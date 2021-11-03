@@ -213,7 +213,6 @@ namespace EsmLoader
 
                 ESM::ESMReader& reader = readers[i];
                 reader.setEncoder(encoder);
-                reader.setIndex(static_cast<int>(i));
                 reader.open(collection.getPath(file).string());
 
                 loadEsm(query, readers[i], result);
