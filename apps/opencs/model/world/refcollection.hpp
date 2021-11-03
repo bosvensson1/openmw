@@ -1,5 +1,5 @@
-#ifndef CSM_WOLRD_REFCOLLECTION_H
-#define CSM_WOLRD_REFCOLLECTION_H
+#ifndef CSM_WORLD_REFCOLLECTION_H
+#define CSM_WORLD_REFCOLLECTION_H
 
 #include <map>
 #include <string_view>
@@ -42,7 +42,7 @@ namespace CSMWorld
               : mCells (cells), mNextId (0)
             {}
 
-            void load (ESM::ESMReader& reader, int cellIndex, bool base,
+            void load (int readerIndex, ESM::ESMReader& reader, int cellIndex, bool base,
                 std::map<unsigned int, unsigned int>& cache, CSMDoc::Messages& messages);
             ///< Load a sequence of references.
 
