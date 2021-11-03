@@ -989,10 +989,10 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
 
     mReader = new ESM::ESMReader;
     mReader->setEncoder (&mEncoder);
-    mReader->setIndex((project || !base) ? 0 : mReaderIndex++);
     mReader->open (path.string());
+    int index = (project || !base) ? 0 : mReaderIndex++;
 
-    mContentFileNames.insert(std::make_pair(path.filename().string(), mReader->getIndex()));
+    mContentFileNames.emplace(path.filename().string(), index);
 
     mBase = base;
     mProject = project;
