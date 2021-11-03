@@ -347,7 +347,7 @@ namespace ESMTerrain
             int tex = data->mTextures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
             if (tex == 0)
                 return std::make_pair(0,0); // vtex 0 is always the base texture, regardless of plugin
-            return std::make_pair(tex, land->getPlugin());
+            return std::make_pair(tex, land->getPluginIndex());
         }
         return std::make_pair(0,0);
     }
