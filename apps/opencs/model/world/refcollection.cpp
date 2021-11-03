@@ -38,7 +38,7 @@ namespace CSMWorld
     }
 }
 
-void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base,
+void CSMWorld::RefCollection::load (int readerIndex, ESM::ESMReader& reader, int cellIndex, bool base,
     std::map<unsigned int, unsigned int>& cache, CSMDoc::Messages& messages)
 {
     Record<Cell> cell = mCells.getRecord (cellIndex);
@@ -91,7 +91,9 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
         else
             ref.mCell = cell2.mId;
 
-        if (ref.mRefNum.mContentFile != -1 && !base)
+        // TODO: We duplicate adjustRefNum() here.
+        ref.mRefNum.mContentFile = readerIndex;
+        if (!base)
         {
             ref.mRefNum.mContentFile = ref.mRefNum.mIndex >> 24;
             ref.mRefNum.mIndex &= 0x00ffffff;
