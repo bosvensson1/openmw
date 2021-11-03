@@ -63,9 +63,16 @@ namespace Shader
 
         void applyStateSet(osg::ref_ptr<osg::StateSet> stateset, osg::Node& node);
 
+        using DefineMap = std::map<std::string, std::string>;
+        /// Allows the insertion of additional ShaderManager definitions.
+        /// @note Their precedence over automatically generated definitions is currently undefined.
+        DefineMap& getDefineMap();
+
     private:
         void pushRequirements(osg::Node& node);
         void popRequirements();
+
+        DefineMap mDefineMap;
 
         bool mForceShaders;
         bool mAllowedToModifyStateSets;
