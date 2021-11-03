@@ -68,7 +68,7 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
     const std::vector<std::string>& archives, const boost::filesystem::path& resDir)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mReader (nullptr), mDialogue (nullptr), mReaderIndex(1),
+  mReader (nullptr), mDialogue (nullptr), mCountReaders(1),
   mFsStrict(fsStrict), mDataPaths(dataPaths), mArchives(archives)
 {
     mVFS.reset(new VFS::Manager(mFsStrict));
@@ -989,10 +989,8 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
 
     mReader = new ESM::ESMReader;
     mReader->setEncoder (&mEncoder);
-    mReader->setIndex((project || !base) ? 0 : mReaderIndex++);
     mReader->open (path.string());
-
-    mContentFileNames.insert(std::make_pair(path.filename().string(), mReader->getIndex()));
+    mCurrentReaderIndex = (project || !base) ? 0 : mCountReaders++;
 
     mBase = base;
     mProject = project;
@@ -1121,7 +1119,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 index = mCells.getSize()-1;
             }
             std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (index));
-            mRefs.load (*mReader, index, mBase, mRefLoadCache[cellId], messages);
+            mRefs.load (mCurrentReaderIndex, *mReader, index, mBase, mRefLoadCache[cellId], messages);
             break;
         }
 
