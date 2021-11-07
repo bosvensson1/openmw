@@ -389,11 +389,6 @@ namespace MWRender
             mAlpha = alpha;
         }
 
-        void setLightSource(const osg::ref_ptr<SceneUtil::LightSource>& lightSource)
-        {
-            mLightSource = lightSource;
-        }
-
     protected:
         void setDefaults(osg::StateSet* stateset) override
         {
@@ -416,13 +411,10 @@ namespace MWRender
         {
             osg::Material* material = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
             material->setAlpha(osg::Material::FRONT_AND_BACK, mAlpha);
-            if (mLightSource)
-                mLightSource->setActorFade(mAlpha);
         }
 
     private:
         float mAlpha;
-        osg::ref_ptr<SceneUtil::LightSource> mLightSource;
     };
 
     struct Animation::AnimSource
@@ -968,8 +960,9 @@ namespace MWRender
                 {
                     osg::ref_ptr<osg::Node> node = getNodeMap().at(it->first); // this should not throw, we already checked for the node existing in addAnimSource
 
-                    node->addUpdateCallback(it->second);
-                    mActiveControllers.emplace_back(node, it->second);
+                    osg::Callback* callback = it->second->getAsCallback();
+                    node->addUpdateCallback(callback);
+                    mActiveControllers.emplace_back(node, callback);
 
                     if (blendMask == 0 && node == mAccumRoot)
                     {
@@ -1484,6 +1477,7 @@ namespace MWRender
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
         mExtraLightSource = SceneUtil::addLight(parent, esmLight, Mask_ParticleSystem, Mask_Lighting, exterior);
+        mExtraLightSource->setActorFade(mAlpha);
     }
 
     void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture)
@@ -1638,7 +1632,6 @@ namespace MWRender
             if (mTransparencyUpdater == nullptr)
             {
                 mTransparencyUpdater = new TransparencyUpdater(alpha);
-                mTransparencyUpdater->setLightSource(mExtraLightSource);
                 mObjectRoot->addCullCallback(mTransparencyUpdater);
             }
             else
@@ -1649,6 +1642,8 @@ namespace MWRender
             mObjectRoot->removeCullCallback(mTransparencyUpdater);
             mTransparencyUpdater = nullptr;
         }
+        if (mExtraLightSource)
+            mExtraLightSource->setActorFade(alpha);
     }
 
     void Animation::setLightEffect(float effect)

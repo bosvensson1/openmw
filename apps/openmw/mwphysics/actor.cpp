@@ -22,7 +22,7 @@ namespace MWPhysics
 
 Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler, bool canWaterWalk)
   : mStandingOnPtr(nullptr), mCanWaterWalk(canWaterWalk), mWalkingOnWater(false)
-  , mMeshTranslation(shape->mCollisionBox.center), mOriginalHalfExtents(shape->mCollisionBox.extents)
+  , mMeshTranslation(shape->mCollisionBox.mCenter), mOriginalHalfExtents(shape->mCollisionBox.mExtents)
   , mStuckFrames(0), mLastStuckPosition{0, 0, 0}
   , mForce(0.f, 0.f, 0.f), mOnGround(true), mOnSlope(false)
   , mInternalCollisionMode(true)
@@ -124,7 +124,6 @@ void Actor::updatePosition()
     mSimulationPosition = worldPosition;
     mPositionOffset = osg::Vec3f();
     mStandingOnPtr = nullptr;
-    mSkipCollisions = true;
     mSkipSimulation = true;
 }
 
@@ -163,17 +162,19 @@ bool Actor::setPosition(const osg::Vec3f& position)
 {
     std::scoped_lock lock(mPositionMutex);
     applyOffsetChange();
-    bool hasChanged = mPosition != position || mWorldPositionChanged;
-    mPreviousPosition = mPosition;
-    mPosition = position;
+    bool hasChanged = (mPosition != position && !mSkipSimulation) || mWorldPositionChanged;
+    if (!mSkipSimulation)
+    {
+        mPreviousPosition = mPosition;
+        mPosition = position;
+    }
     return hasChanged;
 }
 
-void Actor::adjustPosition(const osg::Vec3f& offset, bool ignoreCollisions)
+void Actor::adjustPosition(const osg::Vec3f& offset)
 {
     std::scoped_lock lock(mPositionMutex);
     mPositionOffset += offset;
-    mSkipCollisions = mSkipCollisions || ignoreCollisions;
 }
 
 void Actor::applyOffsetChange()
@@ -272,11 +273,6 @@ void Actor::setStandingOnPtr(const MWWorld::Ptr& ptr)
 {
     std::scoped_lock lock(mPositionMutex);
     mStandingOnPtr = ptr;
-}
-
-bool Actor::skipCollisions()
-{
-    return std::exchange(mSkipCollisions, false);
 }
 
 bool Actor::canMoveToWaterSurface(float waterlevel, const btCollisionWorld* world) const
